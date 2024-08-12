@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 import { User } from './userModel';
 import { UserValidator } from './userValidator';
+import {v4 as uuidv4} from 'uuid';
 
 export const handleRequest = async (req: IncomingMessage, res: ServerResponse, prisma: PrismaClient) => {
     const { method, url } = req;
@@ -15,7 +16,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
             res.end(JSON.stringify(users));
 
         } else if (url?.startsWith('/users/')) {
-            const userId = parseInt(url.split('/')[2]);
+            const userId = url.split('/')[2];
             const user = await prisma.user.findUnique({ where: { id: userId } });
 
             if (user) {
@@ -41,8 +42,9 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                 UserValidator.validateUserPayload(user)
                 await validateNonUniqueUser(user, prisma);
 
+                const userId = 'user-' + uuidv4()
                 
-                const newUser = await prisma.user.create({ data: {...user, dateofbirth: new Date(user.dateofbirth)} });
+                const newUser = await prisma.user.create({ data: {...user, dateofbirth: new Date(user.dateofbirth), id: userId} });
 
                 res.writeHead(201, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(newUser));
@@ -58,7 +60,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         });
         
     } else if (method === 'PUT' && url?.startsWith('/users/')) {
-        const userId = parseInt(url.split('/')[2]);
+        const userId = url.split('/')[2];
         let body = '';
         req.on('data', chunk => { body += chunk; });
         req.on('end', async () => {
@@ -96,14 +98,14 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         });
         
     } else if (method === 'DELETE' && url?.startsWith('/users/')) {
-        const userId = parseInt(url.split('/')[2]);
+        const userId = url.split('/')[2];
         const isUserExist = await valideUserExist(userId, prisma);
 
         if (isUserExist){
             await prisma.user.delete({
                 where:{
                     id: userId
-                },
+                }, 
             });
 
             res.writeHead(204, { 'Content-Type': 'application/json' });
@@ -141,7 +143,7 @@ const validateNonUniqueUser = async (user: User, prisma: PrismaClient) => {
     }
 }
 
-const valideUserExist = async (id: number, prisma: PrismaClient) => {
+const valideUserExist = async (id: string, prisma: PrismaClient) => {
     const existingUser =  await prisma.user.findFirst({
         where: {
             id: id
