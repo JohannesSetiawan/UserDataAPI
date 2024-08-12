@@ -1,6 +1,7 @@
-# HangryCaseStudy-UserData
 
-## Start Server
+# Hangry MSIB 7 - Johannes Setiawan - Backend Engineer - Test Results
+
+## How to start the server
 
 1. Run ```npm install```
 2. Create .env file and set ```DATABASE_URL``` variable with your database URL
