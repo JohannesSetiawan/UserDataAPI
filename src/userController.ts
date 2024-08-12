@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 import { User } from './userModel';
+import { UserValidator } from './userValidator';
 
 export const handleRequest = async (req: IncomingMessage, res: ServerResponse, prisma: PrismaClient) => {
     const { method, url } = req;
@@ -35,9 +36,9 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('data', chunk => { body += chunk; });
         req.on('end', async () => {
             try{
-                const user = JSON.parse(body) as User;
+                const user = JSON.parse(body);
 
-                await validateUserData(user);
+                UserValidator.validateUserPayload(user)
                 await validateNonUniqueUser(user, prisma);
 
                 
@@ -64,7 +65,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
             try{
                 const user = JSON.parse(body) as User;
 
-                await validateUserData(user);
+                UserValidator.validateUserPayload(user)
                 const isUserExist = await valideUserExist(userId, prisma);
 
                 if (isUserExist){
@@ -125,19 +126,6 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         res.end(JSON.stringify(message));
     }
 };
-
-
-const validateUserData = async (user: User) => {
-    if (!user.dateofbirth || !user.email || !user.name){
-        throw new Error("One or more data fields is empty!")
-    }
-    if (!user.email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
-        throw new Error("Invalid email!")
-    }
-    if(isNaN(Date.parse(user.dateofbirth))){
-        throw new Error("Invalid date!")
-    }
-}
 
 const validateNonUniqueUser = async (user: User, prisma: PrismaClient) => {
     const isAlreadyRegister =  await prisma.user.findFirst({
