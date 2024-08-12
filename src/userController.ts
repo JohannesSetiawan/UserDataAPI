@@ -27,7 +27,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                     message: "User not found!",
                 };
 
-                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.writeHead(404, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(message));
             }
         }
@@ -81,7 +81,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                         message: "User not found!",
                     };
     
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(message));
                 }
 
@@ -114,7 +114,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                 message: "User not found!",
             };
 
-            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(message));
         }
         
