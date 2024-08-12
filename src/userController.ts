@@ -40,8 +40,8 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                 await validateUserData(user);
                 await validateNonUniqueUser(user, prisma);
 
-                user.dateofbirth = new Date(user.dateofbirth);
-                const newUser = await prisma.user.create({ data: user });
+                
+                const newUser = await prisma.user.create({ data: {...user, dateofbirth: new Date(user.dateofbirth)} });
 
                 res.writeHead(201, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(newUser));
@@ -62,15 +62,14 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('data', chunk => { body += chunk; });
         req.on('end', async () => {
             try{
-                const user = JSON.parse(body)  as User;
+                const user = JSON.parse(body) as User;
 
                 await validateUserData(user);
                 const isUserExist = await valideUserExist(userId, prisma);
 
                 if (isUserExist){
-                    user.dateofbirth = new Date(user.dateofbirth);
                     const updatedUser = await prisma.user.update({ 
-                        data: user,
+                        data: {...user, dateofbirth: new Date(user.dateofbirth)},
                         where: {id: userId}
                     });
 
@@ -131,6 +130,12 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
 const validateUserData = async (user: User) => {
     if (!user.dateofbirth || !user.email || !user.name){
         throw new Error("One or more data fields is empty!")
+    }
+    if (!user.email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
+        throw new Error("Invalid email!")
+    }
+    if(isNaN(Date.parse(user.dateofbirth))){
+        throw new Error("Invalid date!")
     }
 }
 
