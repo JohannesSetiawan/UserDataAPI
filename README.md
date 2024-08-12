@@ -1,6 +1,6 @@
 # HangryCaseStudy-UserData
 
-## Set Up Prisma in Your Local Machine
+## Start Server
 ```
-
+npm run start
 ```
