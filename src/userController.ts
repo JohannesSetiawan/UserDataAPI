@@ -35,7 +35,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('data', chunk => { body += chunk; });
         req.on('end', async () => {
             try{
-                const user = JSON.parse(body);
+                const user = JSON.parse(body) as User;
 
                 await validateUserData(user);
                 await validateNonUniqueUser(user, prisma);
@@ -62,7 +62,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('data', chunk => { body += chunk; });
         req.on('end', async () => {
             try{
-                const user = JSON.parse(body);
+                const user = JSON.parse(body)  as User;
 
                 await validateUserData(user);
                 const isUserExist = await valideUserExist(userId, prisma);
