@@ -9,7 +9,7 @@
 4. Run ```npx prisma migrate dev``` to migrate prisma schema to your database.
 5. Run ```npm run start``` to start the server.
 
-## Documentation
+## API Documentation
 - ```POST /users``` = Create new user. Name and email must be unique.
 Sample request body:
 ```
@@ -79,3 +79,27 @@ Sample response body:
 ```
 
 - ```DELETE /users/:Id``` = Delete user with specified Id
+
+- Common Errors
+
+    - Register/Update name and/or email with the same name and/or email as other user.
+    ```
+    {
+        "message": "User name or email is already used!"
+    }
+    ```
+
+    - Missing field(s) on request body
+    ```
+    {
+        "message": "\"<field-name>\" is required"
+    }
+    ```
+
+    - Requested user with specified Id not found
+    ```
+    {
+        "message": "User not found!"
+    }
+    ```
+
