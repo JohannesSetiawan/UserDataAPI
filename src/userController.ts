@@ -1,36 +1,46 @@
 import { PrismaClient } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 import { User } from './userModel';
-import { UserValidator } from './userValidator';
+import { UserValidator } from './userPayloadValidator';
 import {v4 as uuidv4} from 'uuid';
+import NodeCache from 'node-cache';
+import { validateNonUniqueUser, valideUserExist } from './userValidator';
 
-export const handleRequest = async (req: IncomingMessage, res: ServerResponse, prisma: PrismaClient) => {
+export const handleRequest = async (req: IncomingMessage, res: ServerResponse, prisma: PrismaClient, cache: NodeCache) => {
     const { method, url } = req;
 
     if (method === 'GET') {
         if (url === '/users') {
-
             const users = await prisma.user.findMany();
-
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(users));
 
         } else if (url?.startsWith('/users/')) {
             const userId = url.split('/')[2];
-            const user = await prisma.user.findUnique({ where: { id: userId } });
+            const cachedUser = cache.get(userId)
 
-            if (user) {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(user));
+            if (cachedUser){
+                res.writeHead(200, { 'Content-Type': 'application/json', 'X-Data-Source': 'cache'});
+                res.end(JSON.stringify(cachedUser));
 
-            } else {
-                const message = {
-                    message: "User not found!",
-                };
+            } else{
+                const user = await prisma.user.findUnique({ where: { id: userId } });
 
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(message));
+                if (user) {
+                    cache.set(userId, user, 3600)
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(user));
+
+                } else {
+                    const message = {
+                        message: "User not found!",
+                    };
+                    res.writeHead(404, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(message));
+                }
             }
+
+            
         }
     } else if (method === 'POST' && url === '/users') {
         let body = '';
@@ -38,14 +48,10 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('end', async () => {
             try{
                 const user = JSON.parse(body);
-
                 UserValidator.validateUserPayload(user)
                 await validateNonUniqueUser(user, prisma);
-
                 const userId = 'user-' + uuidv4()
-                
                 const newUser = await prisma.user.create({ data: {...user, dateofbirth: new Date(user.dateofbirth), id: userId} });
-
                 res.writeHead(201, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(newUser));
 
@@ -53,7 +59,6 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                 const message = {
                     message: error.message || "An unexpected error occurred",
                 };
-
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(message));
             }
@@ -66,8 +71,8 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         req.on('end', async () => {
             try{
                 const user = JSON.parse(body) as User;
-
                 UserValidator.validateUserPayload(user)
+                await validateNonUniqueUser(user, prisma);
                 const isUserExist = await valideUserExist(userId, prisma);
 
                 if (isUserExist){
@@ -75,23 +80,21 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                         data: {...user, dateofbirth: new Date(user.dateofbirth)},
                         where: {id: userId}
                     });
-
+                    cache.del(userId)
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(updatedUser));
+
                 } else{
                     const message = {
                         message: "User not found!",
                     };
-    
                     res.writeHead(404, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify(message));
                 }
-
             } catch(error: any){
                 const message = {
                     message: error.message || "An unexpected error occurred",
                 };
-
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify(message));
             }
@@ -107,7 +110,7 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
                     id: userId
                 }, 
             });
-
+            cache.del(userId)
             res.writeHead(204, { 'Content-Type': 'application/json' });
             res.end();
 
@@ -115,11 +118,9 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
             const message = {
                 message: "User not found!",
             };
-
             res.writeHead(404, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(message));
         }
-        
     } else{
         const message = {
             message: "API Not Found!",
@@ -128,29 +129,3 @@ export const handleRequest = async (req: IncomingMessage, res: ServerResponse, p
         res.end(JSON.stringify(message));
     }
 };
-
-const validateNonUniqueUser = async (user: User, prisma: PrismaClient) => {
-    const isAlreadyRegister =  await prisma.user.findFirst({
-        where: {
-            OR: [
-                { name: user.name },
-                { email: user.email }
-            ]
-        }
-    })
-    if (isAlreadyRegister){
-        throw new Error("User name or email is already registered!")
-    }
-}
-
-const valideUserExist = async (id: string, prisma: PrismaClient) => {
-    const existingUser =  await prisma.user.findFirst({
-        where: {
-            id: id
-        }
-    })
-    if (!existingUser){
-        return false
-    }
-    return true
-}

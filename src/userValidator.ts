@@ -1,16 +1,27 @@
-const Joi = require('Joi')
+import { PrismaClient } from "@prisma/client";
+import { User } from "./userModel";
 
-const userSchema = Joi.object({
-    name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    dateofbirth: Joi.date().iso().required()
-})
-
-export const UserValidator = {
-    validateUserPayload: (payload: any) => {
-      const validationResult = userSchema.validate(payload);
-      if (validationResult.error) {
-        throw new Error(validationResult.error.message);
-      }
-    },
+export const validateNonUniqueUser = async (user: User, prisma: PrismaClient) => {
+    const isAlreadyCreated = await prisma.user.findFirst({
+        where: {
+            OR: [
+                { name: user.name },
+                { email: user.email }
+            ]
+        }
+    });
+    if (isAlreadyCreated) {
+        throw new Error("User name or email is already used!");
+    }
+};
+export const valideUserExist = async (id: string, prisma: PrismaClient) => {
+    const existingUser = await prisma.user.findFirst({
+        where: {
+            id: id
+        }
+    });
+    if (!existingUser) {
+        return false;
+    }
+    return true;
 };

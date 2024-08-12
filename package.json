@@ -14,7 +14,7 @@
     "@prisma/client": "^5.18.0",
     "http": "^0.0.1-security",
     "joi": "^17.13.3",
-    "nanoid": "^5.0.7",
+    "node-cache": "^5.1.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
