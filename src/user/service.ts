@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { ServerResponse } from 'http';
 import NodeCache from 'node-cache';
-import { UserDTO } from './dto';
+import { UserDTO, User } from './dto';
 import { UserValidator } from './payloadValidator';
 import {v4 as uuidv4} from 'uuid';
 import { validateNonUniqueUser, valideUserExist } from './validator';
@@ -38,6 +38,33 @@ export const getUserWithId = async (url: string, prisma: PrismaClient, response:
             response.end(JSON.stringify(message));
         }
     }
+    return response
+}
+
+export const getUserWithQuery = async (url: string, prisma: PrismaClient, response: ServerResponse) => {
+    const query = url.split('/users?')[1].split("&")
+    let emailQuery = query.find(str => str.startsWith('email'))
+    let nameQuery = query.find(str => str.startsWith('name'))
+    let nameQueryResult: Array<User> = []
+    let emailQueryResult: Array<User> = []
+    let finalQueryResult: Array<User> = []
+    if (nameQuery){
+        nameQuery = nameQuery.split('=')[1].replace('%20', ' ')
+        nameQueryResult = await prisma.user.findMany({where: {name: {contains: nameQuery}}})
+        finalQueryResult = nameQueryResult
+    }
+    if (emailQuery){
+        emailQuery = emailQuery.split('=')[1]
+        emailQueryResult = await prisma.user.findMany({where: {email: {contains: emailQuery}}})
+        finalQueryResult = emailQueryResult
+    }
+    if (nameQuery && emailQuery){
+        finalQueryResult = emailQueryResult.filter((user) => nameQueryResult.includes(user))
+    }
+
+    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.end(JSON.stringify({users: finalQueryResult}));
+    
     return response
 }
 

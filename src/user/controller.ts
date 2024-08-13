@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 import NodeCache from 'node-cache';
-import { createUser, deleteUser, getAllUser, getUserWithId, updateUser } from './service';
+import { createUser, deleteUser, getAllUser, getUserWithId, getUserWithQuery, updateUser } from './service';
 
 export const handleRequest = async (request: IncomingMessage, response: ServerResponse, prisma: PrismaClient, cache: NodeCache) => {
     const { method, url } = request;
@@ -13,6 +13,8 @@ export const handleRequest = async (request: IncomingMessage, response: ServerRe
         if (url === '/api/users') {
             response = await getAllUser(prisma, response)
 
+        } else if (url?.startsWith('/api/users?')){
+            response = await getUserWithQuery(url, prisma, response)
         } else {
             response = await getUserWithId(url, prisma, response, cache)
             

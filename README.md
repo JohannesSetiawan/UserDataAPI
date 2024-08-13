@@ -35,23 +35,25 @@ Sample response body:
 - ```GET /api/users``` = Get all created users.
 Sample response body:
 ```
-[
-    {
-        "id": "user-id-1",
-        "name": "nama1",
-        "email": "nama1@email.com",
-        "dateofbirth": "2002-12-21T00:00:00.000Z"
-    },
-    {
-        "id": "user-id-2",
-        "name": "nama2",
-        "email": "nama2@email.com",
-        "dateofbirth": "2002-12-21T00:00:00.000Z"
-    }
-]
+{
+    "users": [
+        {
+            "id": "user-1",
+            "name": "nama",
+            "email": "nama@email.com",
+            "dateofbirth": "2002-12-21T00:00:00.000Z"
+        },
+        {
+            "id": "user-2",
+            "name": "nama2",
+            "email": "nama2@email.com",
+            "dateofbirth": "2002-12-21T00:00:00.000Z"
+        }
+    ]
+}
 ```
 
-- ```GET /api/users/:id``` = Get all created users with specified Id. This API is server-side cached for 1 hour.
+- ```GET /api/users/:id``` = Get created users with specified Id. This API is server-side cached for 1 hour.
 Sample response body:
 ```
 {
@@ -59,6 +61,21 @@ Sample response body:
     "name": "nama1",
     "email": "nama1@email.com",
     "dateofbirth": "2002-12-21T00:00:00.000Z"
+}
+```
+
+- ```GET /api/users?name=name&email=email``` = Get all created users with specified name and/or email.
+Sample response body:
+```
+{
+    "users": [
+        {
+            "id": "user-1",
+            "name": "nama",
+            "email": "nama@email.com",
+            "dateofbirth": "2002-12-21T00:00:00.000Z"
+        }
+    ]
 }
 ```
 
