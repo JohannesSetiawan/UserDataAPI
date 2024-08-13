@@ -52,7 +52,10 @@ export const handleRequest = async (request: IncomingMessage, response: ServerRe
             try{
                 const user = JSON.parse(body);
                 UserValidator.validateUserPayload(user)
-                await validateNonUniqueUser(user, prisma);
+                const existingUser = await validateNonUniqueUser(user, prisma);
+                if (existingUser.length > 0){
+                    throw new Error("User name or email is already used!");
+                }
                 const userId = 'user-' + uuidv4()
                 const newUser = await prisma.user.create({ data: {...user, dateofbirth: new Date(user.dateofbirth), id: userId} });
                 response.writeHead(201, { 'Content-Type': 'application/json' });
@@ -75,10 +78,14 @@ export const handleRequest = async (request: IncomingMessage, response: ServerRe
             try{
                 const user = JSON.parse(body) as User;
                 UserValidator.validateUserPayload(user)
-                await validateNonUniqueUser(user, prisma);
                 const isUserExist = await valideUserExist(userId, prisma);
 
                 if (isUserExist){
+                    const existingUser = await validateNonUniqueUser(user, prisma);
+                    if (existingUser.length > 1 || !existingUser.find(user => user.id === userId)){
+                        throw new Error("User name or email is already used!");
+                    }
+                    
                     const updatedUser = await prisma.user.update({ 
                         data: {...user, dateofbirth: new Date(user.dateofbirth)},
                         where: {id: userId}
