@@ -62,7 +62,7 @@ Sample response body:
 }
 ```
 
-- ```POST /api/users/:Id``` = Update user with specified Id. Name and email must be unique.
+- ```PUT /api/users/:Id``` = Update user with specified Id. Name and email must be unique.
 Sample request body:
 ```
 {
