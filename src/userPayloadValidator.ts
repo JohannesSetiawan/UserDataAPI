@@ -1,4 +1,5 @@
-const Joi = require('Joi')
+import Joi from 'Joi'
+import { User } from './userModel';
 
 const userSchema = Joi.object({
     name: Joi.string().required(),
@@ -7,7 +8,7 @@ const userSchema = Joi.object({
 })
 
 export const UserValidator = {
-    validateUserPayload: (payload: any) => {
+    validateUserPayload: (payload: User) => {
       const validationResult = userSchema.validate(payload);
       if (validationResult.error) {
         throw new Error(validationResult.error.message);
