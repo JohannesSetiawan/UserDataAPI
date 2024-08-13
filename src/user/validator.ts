@@ -11,10 +11,8 @@ export const validateNonUniqueUser = async (user: UserDTO, prisma: PrismaClient)
         }
     });
     return alreadyCreatedUser
-    // if (isAlreadyCreated) {
-    //     throw new Error("User name or email is already used!");
-    // }
 };
+
 export const valideUserExist = async (id: string, prisma: PrismaClient) => {
     const existingUser = await prisma.user.findFirst({
         where: {
