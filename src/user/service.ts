@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { ServerResponse } from 'http';
 import NodeCache from 'node-cache';
-import { User } from './userModel';
-import { UserValidator } from './userPayloadValidator';
+import { UserDTO } from './dto';
+import { UserValidator } from './payloadValidator';
 import {v4 as uuidv4} from 'uuid';
-import { validateNonUniqueUser, valideUserExist } from './userValidator';
+import { validateNonUniqueUser, valideUserExist } from './validator';
 
 export const getAllUser = async (prisma: PrismaClient, response: ServerResponse) => {
     const users = await prisma.user.findMany();
@@ -42,7 +42,7 @@ export const getUserWithId = async (url: string, prisma: PrismaClient, response:
 
 export const createUser = async (body: string, prisma: PrismaClient, response: ServerResponse) => {
     try{
-        const user = JSON.parse(body) as User;
+        const user = JSON.parse(body) as UserDTO;
         UserValidator.validateUserPayload(user)
         const existingUser = await validateNonUniqueUser(user, prisma);
         if (existingUser.length > 0){
@@ -73,7 +73,7 @@ export const updateUser = async (
     cache: NodeCache) => {
     try{
         const userId = url.split('/')[2];
-        const user = JSON.parse(body) as User;
+        const user = JSON.parse(body) as UserDTO;
         UserValidator.validateUserPayload(user)
         const isUserExist = await valideUserExist(userId, prisma);
 

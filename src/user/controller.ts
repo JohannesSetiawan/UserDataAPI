@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { IncomingMessage, ServerResponse } from 'http';
 import NodeCache from 'node-cache';
-import { createUser, deleteUser, getAllUser, getUserWithId, updateUser } from './userService';
+import { createUser, deleteUser, getAllUser, getUserWithId, updateUser } from './service';
 
 export const handleRequest = async (request: IncomingMessage, response: ServerResponse, prisma: PrismaClient, cache: NodeCache) => {
     const { method, url } = request;

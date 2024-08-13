@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { User } from "./userModel";
+import { UserDTO } from "./dto";
 
-export const validateNonUniqueUser = async (user: User, prisma: PrismaClient) => {
+export const validateNonUniqueUser = async (user: UserDTO, prisma: PrismaClient) => {
     const alreadyCreatedUser = await prisma.user.findMany({
         where: {
             OR: [

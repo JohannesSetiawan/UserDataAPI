@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import http from 'http';
-import { handleRequest } from './userController';
+import { handleRequest } from './user/controller';
 import NodeCache from 'node-cache';
 
 

@@ -1,5 +1,5 @@
 import Joi from 'Joi'
-import { User } from './userModel';
+import { UserDTO } from './dto';
 
 const userSchema = Joi.object({
     name: Joi.string().required(),
@@ -8,7 +8,7 @@ const userSchema = Joi.object({
 })
 
 export const UserValidator = {
-    validateUserPayload: (payload: User) => {
+    validateUserPayload: (payload: UserDTO) => {
       const validationResult = userSchema.validate(payload);
       if (validationResult.error) {
         throw new Error(validationResult.error.message);
