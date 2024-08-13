@@ -9,8 +9,11 @@
 4. Run ```npx prisma migrate dev``` to migrate prisma schema to your database.
 5. Run ```npm run start``` to start the server.
 
+## Integration Testing
+There's a Postman Collection and Environtment that you can access [here](https://drive.google.com/drive/folders/1C2UkoLcXgA2v1CmOanqunQBez-a5UXCP?usp=sharing) to test this API. Make sure to use the environtment before you run the collection.
+
 ## API Documentation
-- ```POST /users``` = Create new user. Name and email must be unique.
+- ```POST /api/users``` = Create new user. Name and email must be unique.
 Sample request body:
 ```
 {
@@ -29,7 +32,7 @@ Sample response body:
 }
 ```
 
-- ```GET /users``` = Get all created users.
+- ```GET /api/users``` = Get all created users.
 Sample response body:
 ```
 [
@@ -48,7 +51,7 @@ Sample response body:
 ]
 ```
 
-- ```GET /users/:id``` = Get all created users with specified Id. This API is server-side cached for 1 hour.
+- ```GET /api/users/:id``` = Get all created users with specified Id. This API is server-side cached for 1 hour.
 Sample response body:
 ```
 {
@@ -59,7 +62,7 @@ Sample response body:
 }
 ```
 
-- ```POST /users/:Id``` = Update user with specified Id. Name and email must be unique.
+- ```POST /api/users/:Id``` = Update user with specified Id. Name and email must be unique.
 Sample request body:
 ```
 {
@@ -78,7 +81,7 @@ Sample response body:
 }
 ```
 
-- ```DELETE /users/:Id``` = Delete user with specified Id
+- ```DELETE /api/users/:Id``` = Delete user with specified Id
 
 - Common Errors
 

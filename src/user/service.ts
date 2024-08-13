@@ -8,13 +8,14 @@ import { validateNonUniqueUser, valideUserExist } from './validator';
 
 export const getAllUser = async (prisma: PrismaClient, response: ServerResponse) => {
     const users = await prisma.user.findMany();
+    const data = {users: users}
     response.writeHead(200, { 'Content-Type': 'application/json' });
-    response.end(JSON.stringify(users));
+    response.end(JSON.stringify(data));
     return response
 }
 
 export const getUserWithId = async (url: string, prisma: PrismaClient, response: ServerResponse, cache: NodeCache) => {
-    const userId = url.split('/')[2];
+    const userId = url.split('/')[3];
     const cachedUser = cache.get(userId)
 
     if (cachedUser){
@@ -72,7 +73,7 @@ export const updateUser = async (
     response: ServerResponse, 
     cache: NodeCache) => {
     try{
-        const userId = url.split('/')[2];
+        const userId = url.split('/')[3];
         const user = JSON.parse(body) as UserDTO;
         UserValidator.validateUserPayload(user)
         const isUserExist = await valideUserExist(userId, prisma);
@@ -113,7 +114,7 @@ export const updateUser = async (
 }
 
 export const deleteUser = async (url: string, prisma: PrismaClient, response: ServerResponse, cache: NodeCache) => {
-    const userId = url.split('/')[2];
+    const userId = url.split('/')[3];
     const isUserExist = await valideUserExist(userId, prisma);
 
     if (isUserExist){
