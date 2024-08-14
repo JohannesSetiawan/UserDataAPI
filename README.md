@@ -8,6 +8,11 @@
 4. Run `npx prisma migrate dev` to migrate prisma schema to your database.
 5. Run `npm run start` to start the server.
 
+## Other Command
+1. To start in development mode (using nodemon), run `npm run start:dev`
+2. To fix code using Eslint, run `npm run lint:fix`
+3. To autoformat code using Prettier, run `npm run format:fix`
+
 ## Integration Testing
 
 There's a Postman Collection and Environtment that you can access [here](https://drive.google.com/drive/folders/1C2UkoLcXgA2v1CmOanqunQBez-a5UXCP?usp=sharing) to test this API. Most of the HTTP calls have their own testing script. Make sure to use the environment before you run the collection.
