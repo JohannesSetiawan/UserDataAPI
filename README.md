@@ -10,7 +10,7 @@
 
 ## Integration Testing
 
-There's a Postman Collection and Environtment that you can access [here](https://drive.google.com/drive/folders/1C2UkoLcXgA2v1CmOanqunQBez-a5UXCP?usp=sharing) to test this API. Make sure to use the environtment before you run the collection.
+There's a Postman Collection and Environtment that you can access [here](https://drive.google.com/drive/folders/1C2UkoLcXgA2v1CmOanqunQBez-a5UXCP?usp=sharing) to test this API. Most of the HTTP calls have their own testing script. Make sure to use the environment before you run the collection.
 
 ## API Documentation
 
