@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { ServerResponse } from 'http'
 import NodeCache from 'node-cache'
-import { UserDTO, User } from './dto'
+import { UserDTO } from './dto'
 import { UserValidator } from './payloadValidator'
 import { v4 as uuidv4 } from 'uuid'
 import { validateNonUniqueUser, valideUserExist } from './validator'
@@ -55,34 +55,35 @@ export const getUserWithQuery = async (
     prisma: PrismaClient,
     response: ServerResponse
 ) => {
-    const query = url.split('/users?')[1].split('&')
-    let emailQuery = query.find((str) => str.startsWith('email'))
-    let nameQuery = query.find((str) => str.startsWith('name'))
-    let nameQueryResult: Array<User> = []
-    let emailQueryResult: Array<User> = []
-    let finalQueryResult: Array<User> = []
-    if (nameQuery) {
-        nameQuery = nameQuery.split('=')[1].replace('%20', ' ')
-        nameQueryResult = await prisma.user.findMany({
+    response.writeHead(200, { 'Content-Type': 'application/json' })
+    const allQuery = url.split('/users?')[1].split('&')
+    const isEmailQuery = allQuery.find((str) => str.startsWith('email'))
+    const isNameQuery = allQuery.find((str) => str.startsWith('name'))
+    if (isNameQuery && isEmailQuery) {
+        const nameQuery = isNameQuery.split('=')[1].replace('%20', ' ')
+        const emailQuery = isEmailQuery.split('=')[1]
+        const queryResult = await prisma.user.findMany({
+            where: {
+                email: { contains: emailQuery },
+                name: { contains: nameQuery },
+            },
+        })
+        response.end(JSON.stringify({ users: queryResult }))
+    } else if (isNameQuery) {
+        const nameQuery = isNameQuery.split('=')[1].replace('%20', ' ')
+        const queryResult = await prisma.user.findMany({
             where: { name: { contains: nameQuery } },
         })
-        finalQueryResult = nameQueryResult
-    }
-    if (emailQuery) {
-        emailQuery = emailQuery.split('=')[1]
-        emailQueryResult = await prisma.user.findMany({
+        response.end(JSON.stringify({ users: queryResult }))
+    } else if (isEmailQuery) {
+        const emailQuery = isEmailQuery.split('=')[1]
+        const queryResult = await prisma.user.findMany({
             where: { email: { contains: emailQuery } },
         })
-        finalQueryResult = emailQueryResult
+        response.end(JSON.stringify({ users: queryResult }))
+    } else {
+        response.end(JSON.stringify({ users: [] }))
     }
-    if (nameQuery && emailQuery) {
-        finalQueryResult = emailQueryResult.filter((user) =>
-            nameQueryResult.includes(user)
-        )
-    }
-
-    response.writeHead(200, { 'Content-Type': 'application/json' })
-    response.end(JSON.stringify({ users: finalQueryResult }))
 
     return response
 }

@@ -3,9 +3,3 @@ export type UserDTO = {
     email: string
     dateofbirth: string
 }
-
-export type User = {
-    name: string
-    email: string
-    dateofbirth: Date
-}

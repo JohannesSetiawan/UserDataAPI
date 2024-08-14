@@ -8,7 +8,7 @@
         "start": "npx ts-node src/server.ts",
         "start:dev": "npx nodemon src/server.ts",
         "lint:fix": "npx eslint --fix",
-        "format:write": "prettier --write ."
+        "format:fix": "prettier --write ."
     },
     "keywords": [],
     "author": "",
